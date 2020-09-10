@@ -24,7 +24,10 @@ export default function App() {
   const {
     loading,
     data,
-  } = useQuery(ALL_PEOPLE);
+    refetch,
+    // After refetching, this query will be cached. Removing notifyOnNetworkStatusChange or setting it to false
+    // results in the query NOT being cached on refetch.
+  } = useQuery(ALL_PEOPLE, { notifyOnNetworkStatusChange: true, fetchPolicy: 'no-cache', nextFetchPolicy: 'no-cache' });
 
   const [addPerson] = useMutation(ADD_PERSON, {
     update: (cache, { data: { addPerson: addPersonData } }) => {
@@ -51,9 +54,9 @@ export default function App() {
       </p>
       <div className="add-person">
         <label htmlFor="name">Name</label>
-        <input 
-          type="text" 
-          name="name" 
+        <input
+          type="text"
+          name="name"
           value={name}
           onChange={evt => setName(evt.target.value)}
         />
@@ -70,11 +73,14 @@ export default function App() {
       {loading ? (
         <p>Loading…</p>
       ) : (
-        <ul>
-          {data?.people.map(person => (
-            <li key={person.id}>{person.name}</li>
-          ))}
-        </ul>
+        <>
+          <ul>
+            {data?.people.map(person => (
+              <li key={person.id}>{person.name}</li>
+            ))}
+          </ul>
+          <button onClick={() => refetch()}>Refetch people</button>
+        </>
       )}
     </main>
   );
